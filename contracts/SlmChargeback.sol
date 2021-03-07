@@ -1,54 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ~0.8.0;
+pragma solidity ~0.8.2;
 
-import './Ownable.sol';
-import './IERC20.sol';
-import './SlmJudgement.sol';
+import '../library/SlmShared.sol';
 
 /// @title Solomon Chargeback
 /// @author Solomon DeFi
 /// @notice A contract that holds ETH or ERC20 tokens until purchase conditions are met
-contract SlmChargeback is Ownable {
-
-    // Chargeback/Voting State
-    enum ChargebackState {
-        // Awaiting initial funds
-        Inactive,
-        // Initialized but awaiting SLM or ETH
-        Active,
-        // The chargeback process has been initiated
-        VotePending,
-        // Buyer received the chargeback, contract complete
-        ChargebackComplete,
-        // Merchant has been paid, contract complete
-        MerchantPaid
-    }
-
-    IERC20 public token;
-
-    SlmJudgement public judge;
-
-    address public merchant;
-
-    address public buyer;
+contract SlmChargeback is SlmShared {
 
     uint8 public discount;
 
-    string public buyerEvidenceURL;
-
-    string public merchantEvidenceURL;
-
     uint256 chargebackTime;
-
-    uint256 disputePeriod = 7 days;
-
-    ChargebackState public state = ChargebackState.Inactive;
-
-    event Funded(uint256 amount);
-
-    event ChargebackInitiated(address merchant, address indexed buyer, string evidenceURL);
-
-    event MerchantEvidence(address merchant, address indexed buyer, string evidenceURL);
 
     /// Initialize the contract
     /// @param _judge Contract that assigns votes for chargeback disputes
@@ -63,54 +25,50 @@ contract SlmChargeback is Ownable {
         address _buyer,
         uint8 _discount
     ) external payable {
-        require(state == ChargebackState.Inactive, 'Only initialize once');
-        merchant = _merchant;
-        buyer = _buyer;
+        require(state == TransactionState.Inactive, 'Only initialize once');
+        party1 = _buyer;
+        party2 = _merchant;
         judge = SlmJudgement(_judge);
         token = IERC20(_token);
         discount = _discount;
-        state = ChargebackState.Active;
+        state = TransactionState.Active;
+    }
+
+    function buyer() external view returns (address) {
+        return party1;
+    }
+
+    function merchant() external view returns (address) {
+        return party2;
+    }
+
+    function buyerEvidenceURL() external view returns (string memory) {
+        return party1EvidenceURL;
+    }
+
+    function merchantEvidenceURL() external view returns (string memory) {
+        return party2EvidenceURL;
     }
 
     /// Buyer initiated chargeback dispute
     /// @param _evidenceURL Link to real-world chargeback evidence
     function requestChargeback(string memory _evidenceURL) external {
         require(msg.sender == buyer, 'Only buyer can chargeback');
-        require(bytes(_evidenceURL).length > 0, 'Evidence required');
-        require(bytes(buyerEvidenceURL).length == 0, 'Evidence already provided');
-        buyerEvidenceURL = _evidenceURL;
-        chargebackTime = block.timestamp;
-        state = ChargebackState.VotePending;
-        emit ChargebackInitiated(merchant, buyer, _evidenceURL);
+        initiateDispute();
+        party1Evidence(_evidenceURL);
     }
 
     /// Merchant evidence of completed transaction
     /// @param _evidenceURL Link to real-world evidence
     function merchantEvidence(string memory _evidenceURL) external {
-        require(msg.sender == merchant, 'Only merchant can provide evidence');
-        require(bytes(_evidenceURL).length > 0, 'Evidence required');
-        require(bytes(merchantEvidenceURL).length == 0, 'Evidence already provided');
-        merchantEvidenceURL = _evidenceURL;
-        emit MerchantEvidence(merchant, buyer, _evidenceURL);
-    }
-
-    /// Internal function for dispersing funds
-    /// @param recipient Recipience of funds
-    function withdraw(address recipient) internal {
-        require(block.timestamp > (chargebackTime + disputePeriod), 'Cannot withdraw yet');
-        if(address(token) == address(0)) {
-            // TODO -- transfer fee
-            payable(recipient).transfer(address(this).balance);
-        } else {
-            token.transfer(recipient, token.balanceOf(address(this)));
-        }
+        party2Evidence(_evidenceURL);
     }
 
     /// Allow buyer to withdraw if eligible
     function buyerWithdraw() external {
         require(msg.sender == buyer, 'Only buyer can withdraw');
         require(judge.voteStatus(address(this)) == 3, 'Cannot withdraw');
-        state = ChargebackState.ChargebackComplete;
+        state = TransactionState.CompleteParty1;
         withdraw(buyer);
     }
 
@@ -118,7 +76,7 @@ contract SlmChargeback is Ownable {
     function merchantWithdraw() external {
         require(msg.sender == merchant, 'Only merchant can withdraw');
         require(judge.voteStatus(address(this)) == 2, 'Cannot withdraw');
-        state = ChargebackState.MerchantPaid;
+        state = TransactionState.CompleteParty2;
         withdraw(merchant);
     }
 }
