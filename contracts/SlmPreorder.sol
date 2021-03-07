@@ -3,10 +3,10 @@ pragma solidity ~0.8.2;
 
 import '../library/SlmShared.sol';
 
-/// @title Solomon Presale
+/// @title Solomon Preorder
 /// @author Solomon DeFi
-/// @notice A contract that holds ETH or ERC20 tokens for presale orders until release conditions are met
-contract SlmPresale is SlmShared {
+/// @notice A contract that holds ETH or ERC20 tokens for preorders/crowdfunding until release conditions are met
+contract SlmPreorder is SlmShared {
 
     uint8 public discount;
 
@@ -16,7 +16,7 @@ contract SlmPresale is SlmShared {
     /// @param _merchant The merchant's address
     /// @param _buyer The buyer's address
     /// @param _discount Discount for transaction fee
-    function initializePresale(
+    function initializePreorder(
         address _judge,
         address _token,
         address _merchant,

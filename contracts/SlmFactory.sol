@@ -6,10 +6,10 @@ import '../library/CloneFactory.sol';
 import '../library/IERC20.sol';
 import './SlmChargeback.sol';
 
-/// @title Solomon Decom Factory
+/// @title Solomon Factory
 /// @author Solomon DeFi
-/// @notice Factory for producing Solomon Chargeback contracts
-contract SlmDecomFactory is CloneFactory, Ownable {
+/// @notice Factory for producing Solomon chargeback, preorder, and escrow contracts
+contract SlmFactory is CloneFactory, Ownable {
 
     address public masterContract;
 
@@ -21,7 +21,7 @@ contract SlmDecomFactory is CloneFactory, Ownable {
 
     event ChargebackCreated(address chargebackAddress);
 
-    event PresaleCreated(address presaleAddress);
+    event PreorderCreated(address preorderAddress);
 
     event EscrowCreated(address escrowAddress);
 
@@ -49,9 +49,9 @@ contract SlmDecomFactory is CloneFactory, Ownable {
         emit ChargebackCreated(address(chargeback));
     }
 
-    function createPresale(address merchant, address buyer, address paymentToken) external payable {
+    function createPreorder(address merchant, address buyer, address paymentToken) external payable {
         // TODO -- placeholder for when implementation is split to separate repo
-        emit PresaleCreated(address(0));
+        emit PreorderCreated(address(0));
     }
 
     function createEscrow(address party1, address party2, address paymentToken) external payable {

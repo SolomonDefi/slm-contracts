@@ -1,7 +1,7 @@
 {
-  "name": "slm-chargebacks",
-  "version": "1.0.0",
-  "description": "A sale contract for ERC20 tokens to facilitate the Solomon Presale and any future ETH -> SLM sales.",
+  "name": "slm-contracts",
+  "version": "0.1.0",
+  "description": "Solomon smart contracts, for ETH/ERC20 transactions with buyer insurance.",
   "main": "index.js",
   "scripts": {
     "compile": "npx hardhat compile",
