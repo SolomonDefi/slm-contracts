@@ -1,5 +1,11 @@
+// SPDX-License-Identifier: GPL-3.0-only
+pragma solidity ~0.8.2;
 
-abstract contract SlmShared {
+import './Ownable.sol';
+import './IERC20.sol';
+import './SlmJudgement.sol';
+
+abstract contract SlmShared is Ownable {
 
     IERC20 public token;
 
@@ -13,7 +19,9 @@ abstract contract SlmShared {
 
     string internal party2EvidenceURL;
 
-    uint256 internal disputePeriod = 7 days;
+    uint256 public disputeTime;
+
+    uint256 public disputePeriod = 7 days;
 
     TransactionState public state = TransactionState.Inactive;
 
@@ -33,15 +41,25 @@ abstract contract SlmShared {
         CompleteParty2
     }
 
-    event DisputeInitiated(address party1, address indexed party2, string evidenceURL);
+    event DisputeInitiated(address indexed party1, address indexed party2);
 
     event Evidence(address indexed party, string evidenceURL);
+
+    /// Shared contract initialization
+    /// @param _judge Contract that assigns votes for transaction disputes
+    /// @param _token Token for ERC20 payments
+    function initialize(address _judge, address _token) internal {
+        require(state == TransactionState.Inactive, 'Only initialize once');
+        judge = SlmJudgement(_judge);
+        token = IERC20(_token);
+        state = TransactionState.Active;
+    }
 
     // Initiate a transaction dispute
     function initiateDispute() internal {
         state = TransactionState.VotePending;
-        emit ChargebackInitiated(merchant, buyer, _evidenceURL);
-        chargebackTime = block.timestamp;
+        emit DisputeInitiated(party1, party2);
+        disputeTime = block.timestamp;
     }
 
     /// Second party dispute evidence
@@ -69,7 +87,7 @@ abstract contract SlmShared {
     /// Internal function for dispersing funds
     /// @param recipient Recipient of funds
     function withdraw(address recipient) internal {
-        require(block.timestamp > (chargebackTime + disputePeriod), 'Cannot withdraw yet');
+        require(block.timestamp > (disputeTime + disputePeriod), 'Cannot withdraw yet');
         // TODO -- transfer fee
         if(address(token) == address(0)) {
             payable(recipient).transfer(address(this).balance);

@@ -10,8 +10,6 @@ contract SlmChargeback is SlmShared {
 
     uint8 public discount;
 
-    uint256 chargebackTime;
-
     /// Initialize the contract
     /// @param _judge Contract that assigns votes for chargeback disputes
     /// @param _token Token for ERC20 payments
@@ -25,20 +23,17 @@ contract SlmChargeback is SlmShared {
         address _buyer,
         uint8 _discount
     ) external payable {
-        require(state == TransactionState.Inactive, 'Only initialize once');
+        super.initialize(_judge, _token);
         party1 = _buyer;
         party2 = _merchant;
-        judge = SlmJudgement(_judge);
-        token = IERC20(_token);
         discount = _discount;
-        state = TransactionState.Active;
     }
 
-    function buyer() external view returns (address) {
+    function buyer() public view returns (address) {
         return party1;
     }
 
-    function merchant() external view returns (address) {
+    function merchant() public view returns (address) {
         return party2;
     }
 
@@ -53,7 +48,7 @@ contract SlmChargeback is SlmShared {
     /// Buyer initiated chargeback dispute
     /// @param _evidenceURL Link to real-world chargeback evidence
     function requestChargeback(string memory _evidenceURL) external {
-        require(msg.sender == buyer, 'Only buyer can chargeback');
+        require(msg.sender == buyer(), 'Only buyer can chargeback');
         initiateDispute();
         party1Evidence(_evidenceURL);
     }
@@ -66,17 +61,17 @@ contract SlmChargeback is SlmShared {
 
     /// Allow buyer to withdraw if eligible
     function buyerWithdraw() external {
-        require(msg.sender == buyer, 'Only buyer can withdraw');
+        require(msg.sender == buyer(), 'Only buyer can withdraw');
         require(judge.voteStatus(address(this)) == 3, 'Cannot withdraw');
         state = TransactionState.CompleteParty1;
-        withdraw(buyer);
+        withdraw(buyer());
     }
 
     /// Allow merchant to withdraw if eligible
     function merchantWithdraw() external {
-        require(msg.sender == merchant, 'Only merchant can withdraw');
+        require(msg.sender == merchant(), 'Only merchant can withdraw');
         require(judge.voteStatus(address(this)) == 2, 'Cannot withdraw');
         state = TransactionState.CompleteParty2;
-        withdraw(merchant);
+        withdraw(merchant());
     }
 }
