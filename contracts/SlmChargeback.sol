@@ -16,53 +16,51 @@ contract SlmChargeback is SlmShared {
     /// @param _merchant The merchant's address
     /// @param _buyer The buyer's address
     /// @param _discount Discount for transaction fee
-    function initialize(
+    function initializeChargeback(
         address _judge,
         address _token,
         address _merchant,
         address _buyer,
         uint8 _discount
     ) external payable {
-        super.initialize(_judge, _token);
-        party1 = _buyer;
-        party2 = _merchant;
+        super.initialize(_judge, _token, _buyer, _merchant);
         discount = _discount;
     }
 
     function buyer() public view returns (address) {
-        return party1;
+        return _party1;
     }
 
     function merchant() public view returns (address) {
-        return party2;
+        return _party2;
     }
 
     function buyerEvidenceURL() external view returns (string memory) {
-        return party1EvidenceURL;
+        return _party1EvidenceURL;
     }
 
     function merchantEvidenceURL() external view returns (string memory) {
-        return party2EvidenceURL;
+        return _party2EvidenceURL;
     }
 
     /// Buyer initiated chargeback dispute
     /// @param _evidenceURL Link to real-world chargeback evidence
     function requestChargeback(string memory _evidenceURL) external {
         require(msg.sender == buyer(), 'Only buyer can chargeback');
-        initiateDispute();
-        party1Evidence(_evidenceURL);
+        super._initiateDispute();
+        super._party1Evidence(_evidenceURL);
     }
 
     /// Merchant evidence of completed transaction
     /// @param _evidenceURL Link to real-world evidence
     function merchantEvidence(string memory _evidenceURL) external {
-        party2Evidence(_evidenceURL);
+        super._party2Evidence(_evidenceURL);
     }
 
     /// Allow buyer to withdraw if eligible
     function buyerWithdraw() external {
         require(msg.sender == buyer(), 'Only buyer can withdraw');
-        require(judge.voteStatus(address(this)) == 3, 'Cannot withdraw');
+        require(judge.voteStatus(address(this)) == 2, 'Cannot withdraw');
         state = TransactionState.CompleteParty1;
         withdraw(buyer());
     }
@@ -70,7 +68,7 @@ contract SlmChargeback is SlmShared {
     /// Allow merchant to withdraw if eligible
     function merchantWithdraw() external {
         require(msg.sender == merchant(), 'Only merchant can withdraw');
-        require(judge.voteStatus(address(this)) == 2, 'Cannot withdraw');
+        require(judge.voteStatus(address(this)) == 3, 'Cannot withdraw');
         state = TransactionState.CompleteParty2;
         withdraw(merchant());
     }

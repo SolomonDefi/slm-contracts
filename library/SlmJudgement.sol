@@ -60,8 +60,8 @@ contract SlmJudgement is Ownable {
         if(merchantVotes + buyerVotes < dispute.quorum) {
             return 1;
         }
-        // Tie goes to the merchant
-        if(merchantVotes >= buyerVotes) {
+        // Tie goes to the buyer
+        if(buyerVotes >= merchantVotes) {
             return 2;
         }
         return 3;

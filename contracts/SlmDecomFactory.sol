@@ -45,7 +45,7 @@ contract SlmDecomFactory is CloneFactory, Ownable {
         } else {
             require(msg.value > 0, 'Payment not provided');
         }
-        chargeback.initialize{ value: msg.value }(judge, paymentToken, merchant, buyer, discount);
+        chargeback.initializeChargeback{ value: msg.value }(judge, paymentToken, merchant, buyer, discount);
         emit ChargebackCreated(address(chargeback));
     }
 

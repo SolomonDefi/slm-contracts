@@ -11,13 +11,13 @@ abstract contract SlmShared is Ownable {
 
     SlmJudgement public judge;
 
-    address internal party1;
+    address internal _party1;
 
-    address internal party2;
+    address internal _party2;
 
-    string internal party1EvidenceURL;
+    string internal _party1EvidenceURL;
 
-    string internal party2EvidenceURL;
+    string internal _party2EvidenceURL;
 
     uint256 public disputeTime;
 
@@ -48,40 +48,44 @@ abstract contract SlmShared is Ownable {
     /// Shared contract initialization
     /// @param _judge Contract that assigns votes for transaction disputes
     /// @param _token Token for ERC20 payments
-    function initialize(address _judge, address _token) internal {
+    /// @param _p1 The address of the first party
+    /// @param _p2 The address of the second party
+    function initialize(address _judge, address _token, address _p1, address _p2) internal {
         require(state == TransactionState.Inactive, 'Only initialize once');
         judge = SlmJudgement(_judge);
         token = IERC20(_token);
+        _party1 = _p1;
+        _party2 = _p2;
         state = TransactionState.Active;
     }
 
     // Initiate a transaction dispute
-    function initiateDispute() internal {
+    function _initiateDispute() internal {
         state = TransactionState.VotePending;
-        emit DisputeInitiated(party1, party2);
+        emit DisputeInitiated(_party1, _party2);
         disputeTime = block.timestamp;
     }
 
     /// Second party dispute evidence
     /// @param _evidenceURL Link to real-world evidence
-    function party1Evidence(string memory _evidenceURL) internal {
+    function _party1Evidence(string memory _evidenceURL) internal {
         require(state == TransactionState.VotePending, 'No dispute active');
-        require(msg.sender == party1, 'Invalid sender');
+        require(msg.sender == _party1, 'Invalid sender');
         require(bytes(_evidenceURL).length > 0, 'Evidence required');
-        require(bytes(party1EvidenceURL).length == 0, 'Evidence already provided');
-        party1EvidenceURL = _evidenceURL;
-        emit Evidence(party1, _evidenceURL);
+        require(bytes(_party1EvidenceURL).length == 0, 'Evidence already provided');
+        _party1EvidenceURL = _evidenceURL;
+        emit Evidence(_party1, _evidenceURL);
     }
 
     /// Second party dispute evidence
     /// @param _evidenceURL Link to real-world evidence
-    function party2Evidence(string memory _evidenceURL) internal {
+    function _party2Evidence(string memory _evidenceURL) internal {
         require(state == TransactionState.VotePending, 'No dispute active');
-        require(msg.sender == party2, 'Invalid sender');
+        require(msg.sender == _party2, 'Invalid sender');
         require(bytes(_evidenceURL).length > 0, 'Evidence required');
-        require(bytes(party2EvidenceURL).length == 0, 'Evidence already provided');
-        party2EvidenceURL = _evidenceURL;
-        emit Evidence(party2, _evidenceURL);
+        require(bytes(_party2EvidenceURL).length == 0, 'Evidence already provided');
+        _party2EvidenceURL = _evidenceURL;
+        emit Evidence(_party2, _evidenceURL);
     }
 
     /// Internal function for dispersing funds
