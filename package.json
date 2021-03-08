@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "compile": "npx hardhat compile",
-    "test": "npx hardhat test"
+    "test": "npx hardhat test",
+    "coverage": "npx hardhat coverage"
   },
   "keywords": [],
   "author": "Solomon Defi",
@@ -20,6 +21,7 @@
     "ethereum-waffle": "^3.3.0",
     "ethers": "^5.0.31",
     "hardhat": "^2.1.1",
-    "hardhat-dependency-compiler": "^1.1.0"
+    "hardhat-dependency-compiler": "^1.1.0",
+    "solidity-coverage": "^0.7.16"
   }
 }
