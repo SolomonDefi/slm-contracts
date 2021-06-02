@@ -1,17 +1,18 @@
 # Solomon Decom Contracts
 
-This repository is a snapshot of SlmChargeback development work, and contains the factory contract, library code, and specific parameters for Solomon Chargeback contracts.
+This repository is the home of all Ethereum smart contracts for the Solomon Defi checkout plugin.
 
-Preorder and Escrow contract development is underway, and once near completion the repository structure will be as follows:
+The main entry point is `SlmFactory.sol`, which implements a contract factory for cheaply generating and managing escrow, preorder, and chargeback contracts.
 
-### slm-contract-factory
+## Contracts
+
+All contracts are located in the `contracts/` folder. Below are basic descriptions of the contracts, with further documentation available at https://solomondefi.github.io/docs/
+
+### SlmFactory.sol
 Contract factory for producing chargeback, Preorder, and escrow contracts with low gas cost. Depends on `SlmChargeback`, `SlmPreorder`,
 `SlmEscrow`, and `SlmJudgement`.
 
-Contracts:
-- `SlmDecomFactory.sol`
-
-### slm-contract-lib
+### library/
 Library contracts for chargeback, preorder, and escrow related functionality.
 
 Contracts:
@@ -22,16 +23,16 @@ Contracts:
 - `SlmStaking.sol`
     - Provides a mechanism for staking SLM, and distributes purchase fees to stakers
 
-### slm-chargebacks
+### SlmChargeback.sol
 Purchase/Chargeback contract
 
-### slm-preorder
+### SlmPreorder.sol
 Preorder contract
 
-### slm-escrow
+### SlmEscrow.sol
 Escrow contract
 
-## Contribution
+## Contributing
 SLM purchase contracts are written in Solidity. We use [Hardhat](https://hardhat.org/) for development, and future packages will be pushed
 to NPM. For now, contracts are included by adding a git tag to dependencies, and importing directly from `node_modules/`
 
