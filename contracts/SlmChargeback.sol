@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity 0.8.4;
 
-import '../library/SlmShared.sol';
+import './library/SlmShared.sol';
 
 /// @title Solomon Chargeback
 /// @author Solomon DeFi
