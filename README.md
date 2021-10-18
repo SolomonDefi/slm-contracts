@@ -51,4 +51,6 @@ npx hardhat compile
 npx hardhat test
 ```
 
+The folder `contracts/test-token` is a snapshot of contracts in the [slm-token](https://github.com/SolomonDefi/slm-token) repo as of October 18, 2021. These contracts are used only for testing.
+
 TODO -- Include contribution guidelines
