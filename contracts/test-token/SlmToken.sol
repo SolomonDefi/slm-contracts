@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ~0.8.0;
+pragma solidity 0.8.9;
 
 import "./LockableToken.sol";
 
@@ -7,7 +7,7 @@ import "./LockableToken.sol";
 /// @author Solomon DeFi
 /// @notice Solomon ERC20 token (SLM)
 contract SlmToken is LockableToken {
-	
+
 	constructor(
         string memory name,
         string memory symbol,
@@ -24,5 +24,5 @@ contract SlmToken is LockableToken {
     function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
     }
-	
+
 }

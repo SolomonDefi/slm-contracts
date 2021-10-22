@@ -9,7 +9,7 @@ const loggingEnabled = process.env.EVM_LOGGING === '1';
 const testReportGas = process.env.TEST_REPORT_GAS === '1';
 
 module.exports = {
-  solidity: '0.8.4',
+  solidity: '0.8.9',
   typechain: {
     outDir: 'src/types',
     target: 'ethers-v5',

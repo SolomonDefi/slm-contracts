@@ -45,21 +45,13 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.SlmPreorder__factory>;
     getContractFactory(
-      name: "LockableToken",
+      name: "SlmStakerManager",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.LockableToken__factory>;
+    ): Promise<Contracts.SlmStakerManager__factory>;
     getContractFactory(
-      name: "Migrations",
+      name: "SlmStakerStorage",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.Migrations__factory>;
-    getContractFactory(
-      name: "Ownable",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.Ownable__factory>;
-    getContractFactory(
-      name: "SlmToken",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.SlmToken__factory>;
+    ): Promise<Contracts.SlmStakerStorage__factory>;
     getContractFactory(
       name: "ERC20",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -69,9 +61,13 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ERC20Burnable__factory>;
     getContractFactory(
-      name: "IERC20",
+      name: "LockableToken",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IERC20__factory>;
+    ): Promise<Contracts.LockableToken__factory>;
+    getContractFactory(
+      name: "SlmToken",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SlmToken__factory>;
 
     getContractAt(
       name: "IERC20",
@@ -114,25 +110,15 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.SlmPreorder>;
     getContractAt(
-      name: "LockableToken",
+      name: "SlmStakerManager",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.LockableToken>;
+    ): Promise<Contracts.SlmStakerManager>;
     getContractAt(
-      name: "Migrations",
+      name: "SlmStakerStorage",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.Migrations>;
-    getContractAt(
-      name: "Ownable",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.Ownable>;
-    getContractAt(
-      name: "SlmToken",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.SlmToken>;
+    ): Promise<Contracts.SlmStakerStorage>;
     getContractAt(
       name: "ERC20",
       address: string,
@@ -144,10 +130,15 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.ERC20Burnable>;
     getContractAt(
-      name: "IERC20",
+      name: "LockableToken",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.IERC20>;
+    ): Promise<Contracts.LockableToken>;
+    getContractAt(
+      name: "SlmToken",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SlmToken>;
 
     // default types
     getContractFactory(
