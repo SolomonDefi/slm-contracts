@@ -1,3 +1,7 @@
+> :warning: This repository has moved :warning:
+
+Solomon is migrating to a monorepo, this repository is no longer used. See https://github.com/solomondefi/solomon-monorepo
+
 # Solomon Decom Contracts
 
 This repository is the home of all Ethereum smart contracts for the Solomon Defi checkout plugin.
