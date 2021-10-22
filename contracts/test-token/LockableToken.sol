@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ~0.8.0;
+pragma solidity 0.8.9;
 
-import "./Ownable.sol";
-import "./zeppelin/ERC20Burnable.sol";
+import "../library/Ownable.sol";
+import "./ERC20Burnable.sol";
 
 /// @title Lockable token with exceptions
 /// @dev Standard burnable ERC20 token modified with pausable transfers.

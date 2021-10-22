@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.4;
+pragma solidity 0.8.9;
 
-import "./Ownable.sol";
+import "./library/Ownable.sol";
+import "./library/IERC20.sol";
 import "./SlmStakerManager.sol";
-import "./library/ERC20.sol";
 
 // TODO: Add back interest/reward sections
 // TODO: Update references to SLM Token
@@ -12,7 +12,7 @@ import "./library/ERC20.sol";
 contract SlmStakerStorage is Ownable {
     address stakerManager;
 
-    ERC20 public token;
+    IERC20 public token;
 
     uint256 minStake;
 
@@ -51,12 +51,12 @@ contract SlmStakerStorage is Ownable {
     }
 
     modifier onlyOwnerOrManager() {
-        require(msg.sender == owner || msg.sender == StakerManager, "Unauthorized access");
+        require(msg.sender == owner || msg.sender == stakerManager, "Unauthorized access");
         _;
     }
 
     modifier onlyManager() {
-        require(msg.sender == StakerManager, "Unauthorized access");
+        require(msg.sender == stakerManager, "Unauthorized access");
         _;
     }
 
@@ -64,7 +64,7 @@ contract SlmStakerStorage is Ownable {
         require(tokenAddress != address(0), "Zero addr");
         require(initialUnstakePeriod > 0, "Invalid unstake period");
         require(minimumStake > 0, "Invalid minimum stake");
-        token = ERC20(tokenAddress);
+        token = IERC20(tokenAddress);
         unstakePeriod = initialUnstakePeriod;
         minStake = minimumStake;
     }
@@ -74,7 +74,7 @@ contract SlmStakerStorage is Ownable {
         stakerManager = newStakerManager;
     }
 
-    function setMinStake(uint256 newMinStake) {
+    function setMinStake(uint256 newMinStake) external onlyOwner {
         require(newMinStake > 0, "Invalid minimum stake");
         minStake = newMinStake;
     }
@@ -91,12 +91,12 @@ contract SlmStakerStorage is Ownable {
         addressLookup[userId] = walletAddress;
     }
 
-    function getUserId(address walletAddress) external returns(uint256) {
+    function getUserId(address walletAddress) external view returns(uint256) {
         require(walletAddress != address(0), "Zero addr");
         return userIdList[walletAddress];
     }
 
-    function getUserAddress(uint256 userId) external returns(address) {
+    function getUserAddress(uint256 userId) external view returns(address) {
         return addressLookup[userId];
     }
 
@@ -105,8 +105,8 @@ contract SlmStakerStorage is Ownable {
         stakerPool[msg.sender] = newStakerPool;
     }
 
-    function getStakerPool(address managerAddress) external {
-        if(manager == address(0)) {
+    function getStakerPool(address managerAddress) external view returns(uint256[] memory) {
+        if(managerAddress == address(0)) {
             return stakerPool[stakerManager];
         }
         return stakerPool[managerAddress];
@@ -115,21 +115,21 @@ contract SlmStakerStorage is Ownable {
     function getStake(address user, uint256 beneficiary) external view returns(uint256) {
         require(user != address(0), "Zero addr");
         require(beneficiary > 0, "Invalid account");
-        return stakes[user][beneficiary].stake;
+        return stakes[user][beneficiary];
     }
 
     function increaseStakeAmount(address user, uint256 beneficiary, uint256 amount) external onlyOwnerOrManager {
         require(user != address(0), "Zero addr");
         require(beneficiary > 0, "Invalid account");
         require(amount > 0, "Invalid amount");
-        stakes[user][beneficiary].stake += amount;
+        stakes[user][beneficiary] += amount;
     }
 
     function decreaseStakeAmount(address user, uint256 beneficiary, uint256 amount) external onlyOwnerOrManager {
         require(user != address(0), "Zero addr");
         require(beneficiary > 0, "Invalid account");
         require(amount > 0, "Invalid amount");
-        stakes[user][beneficiary].stake -= amount;
+        stakes[user][beneficiary] -= amount;
     }
 
     function increaseOutstandingVotes(uint256 amount, address user, uint256 beneficiary) external onlyOwnerOrManager {
@@ -258,4 +258,3 @@ contract SlmStakerStorage is Ownable {
     }
 
 }
-

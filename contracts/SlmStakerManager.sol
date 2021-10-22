@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.4;
+pragma solidity 0.8.9;
 
-import "./Ownable.sol";
-import "./SlmStakerStorage.sol";
-import "./library/ERC20.sol";
+import "./library/Ownable.sol";
+import "./library/IERC20.sol";
 import "./library/SlmJudgement.sol";
+import "./SlmStakerStorage.sol";
 
 // TODO: Add back interest/reward sections + Unstaking mechanism
 // TODO: Add back functions related to voting
@@ -18,14 +18,14 @@ contract SlmStakerManager is Ownable {
 
     uint256[] public stakerPool;
 
-    ERC20 public token;
+    IERC20 public token;
 
     SlmStakerStorage public stakerStorage;
-    
+
     SlmJudgement public judgement;
 
     modifier onlyOwnerOrJudgement() {
-        require(msg.sender == owner || msg.sender == judgement, "Unauthorized access");
+        require(msg.sender == owner || msg.sender == address(judgement), "Unauthorized access");
         _;
     }
 
@@ -35,7 +35,7 @@ contract SlmStakerManager is Ownable {
     ) {
         require(tokenAddress != address(0), "Zero addr");
         require(stakerStorageAddress != address(0), "Zero addr");
-        token = ERC20(tokenAddress);
+        token = IERC20(tokenAddress);
         stakerStorage = SlmStakerStorage(stakerStorageAddress);
     }
 
@@ -44,7 +44,7 @@ contract SlmStakerManager is Ownable {
         judgement = SlmJudgement(judgementAddress);
     }
 
-    function getStakerPool() external onlyOwnerOrJudgement {
+    function getStakerPool() external view onlyOwnerOrJudgement returns(uint256[] memory) {
         return stakerPool;
     }
 
@@ -79,8 +79,8 @@ contract SlmStakerManager is Ownable {
 
         stakerStorage.decreaseStakeAmount(backer, beneficiary, userStake);
 
-        stakerStorage.pushUnstakedCSInfo(backer, beneficiary, userStake, block.timestamp);
-        stakerStorage.sendFunds(backer, total);
+        stakerStorage.pushUnstakedInfo(backer, beneficiary, userStake, block.timestamp);
+        stakerStorage.sendFunds(backer, userStake);
 
         for(uint256 i = 0; i < stakerPool.length; i += 1) {
             if(stakerPool[i] == beneficiary) {
@@ -89,39 +89,38 @@ contract SlmStakerManager is Ownable {
         }
         stakerStorage.updateStakerPool(stakerPool);
 
-        emit UnstakeSLM(total, beneficiary, backer);
-        return total;
+        emit UnstakeSLM(userStake, beneficiary, backer);
+        return userStake;
     }
 
     function setVoteDetails(address disputeAddress, uint256 endTime) public onlyOwnerOrJudgement {
         uint256 prevEndTime = stakerStorage.getVoteEndTime(disputeAddress);
         require(prevEndTime == 0 || block.timestamp > prevEndTime, "Dispute vote in progress");
 
-        uint256[] jurorList = judgement.getJurors(disputeAddress);
-    
+        uint256[] memory jurorList = judgement.getJurors(disputeAddress);
+
         stakerStorage.setVoteEndTime(disputeAddress, endTime);
 
         for(uint256 i = 0; i < jurorList.length; i++) {
+            uint256 currentJuror = jurorList[i];
             uint256 disputeVoteCount = stakerStorage.getDisputeVoteCount(disputeAddress, currentJuror);
             if(disputeVoteCount == 0) {
-                stakerStorage.increaseOutstandingVote(1, disputeAddress, currentJuror);
+                stakerStorage.increaseOutstandingVotes(1, disputeAddress, currentJuror);
                 stakerStorage.increaseDisputeVoteCount(1, disputeAddress, currentJuror);
             } else {
-                stakerStorage.decreaseOutstandingVote(disputeVoteCount, disputeAddress, currentJuror);
-                stakerStorage.increaseOutstandingVote(1, disputeAddress, currentJuror);
+                stakerStorage.decreaseOutstandingVotes(disputeVoteCount, disputeAddress, currentJuror);
+                stakerStorage.increaseOutstandingVotes(1, disputeAddress, currentJuror);
                 stakerStorage.decreaseDisputeVoteCount(disputeVoteCount, disputeAddress, currentJuror);
                 stakerStorage.increaseDisputeVoteCount(1, disputeAddress, currentJuror);
             }
         }
     }
 
-    function getUserId(address walletAddress) external returns(uint256) {
-        uint256 userId = stakerStorage.getUserId(walletAddress);
-        return userId;
+    function getUserId(address walletAddress) external view returns(uint256) {
+        return stakerStorage.getUserId(walletAddress);
     }
 
-    function getUserAddress(uint256 userId) external returns(address) {
-        uint256 userAddress = stakerStorage.getUserAddress(userId);
-        return userAddress;
+    function getUserAddress(uint256 userId) external view returns(address) {
+        return stakerStorage.getUserAddress(userId);
     }
 }
